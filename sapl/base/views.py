@@ -12,7 +12,7 @@ from django.contrib.auth.models import Group, User
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ObjectDoesNotExist, PermissionDenied, ValidationError
 from django.core.mail import send_mail
-from django.core.urlresolvers import reverse, reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.db import connection
 from django.db.models import Count, Q, ProtectedError, Max
 from django.shortcuts import render
@@ -22,7 +22,6 @@ from django.template.loader import get_template
 from django.utils import timezone
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.utils.translation import string_concat
 from django.utils.translation import ugettext_lazy as _
 from django.views.generic import (CreateView, DetailView, DeleteView, FormView, ListView, UpdateView)
 from django.views.generic.base import RedirectView, TemplateView
@@ -108,7 +107,7 @@ class TipoAutorCrud(CrudAux):
         @property
         def verbose_name(self):
             vn = super().verbose_name
-            vn = string_concat(vn, ' ', _('Externo ao SAPL'))
+            vn = "{} {}".format(vn, _('Externo ao SAPL'))
             return vn
 
     class ListView(CrudAux.ListView):
@@ -1433,20 +1432,20 @@ def bancada_comissao_autor_externo():
 
     lista_bancada_autor_externo = []
     for bancada in Bancada.objects.all().order_by('nome'):
-        autor_externo = bancada.autor.filter(tipo=tipo_autor_externo)
+        autor_externo = bancada.autor.filter(tipo__in=tipo_autor_externo)
 
         if autor_externo:
-            q_autor_externo = bancada.autor.get(tipo=tipo_autor_externo)
+            q_autor_externo = bancada.autor.get(tipo__in=tipo_autor_externo)
             lista_bancada_autor_externo.append(
                 (q_autor_externo, bancada, 'Bancada', 'sistema/bancada')
             )
 
     lista_comissao_autor_externo = []
     for comissao in Comissao.objects.all().order_by('nome'):
-        autor_externo = comissao.autor.filter(tipo=tipo_autor_externo)
+        autor_externo = comissao.autor.filter(tipo__in=tipo_autor_externo)
 
         if autor_externo:
-            q_autor_externo = comissao.autor.get(tipo=tipo_autor_externo)
+            q_autor_externo = comissao.autor.get(tipo__in=tipo_autor_externo)
             lista_comissao_autor_externo.append(
                 (q_autor_externo, comissao, 'Comissão', 'comissao')
             )

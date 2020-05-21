@@ -3,7 +3,7 @@ import logging
 from django import apps
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
-from django.core.urlresolvers import reverse_lazy
+from django.urls import reverse_lazy
 from django.db.models import Q
 from django.db.models.fields.files import FileField
 from django.db.models.signals import post_save
@@ -620,7 +620,7 @@ class AppVersionView(APIView):
             'description': 'Sistema de Apoio ao Processo Legislativo',
             'version': settings.SAPL_VERSION,
             'user': request.user.username,
-            'is_authenticated': request.user.is_authenticated(),
+            'is_authenticated': request.user.is_authenticated,
         }
         return Response(content)
 
