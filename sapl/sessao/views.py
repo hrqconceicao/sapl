@@ -529,21 +529,45 @@ def get_presencas_generic(model, sessao, legislatura):
             yield (m.parlamentar, False)
 
 
-def materias_sessao_plenaria_ajax(request):
-    url = request.GET['url_atual'].split("/")
-    url = url[len(url)-1]
+def filtra_materias_copia_sessao_ajax(request):
+    title_flag =  request.GET['title_flag']
+    sessao_plenaria = request.GET['sessao_plenaria_atual']
+    sessao_plenaria_destino = request.GET['sessao_plenaria_destino']
 
-    if url == "transf-mat-exp":
-        materias_sessao = ExpedienteMateria.objects.filter(
-            sessao_plenaria=request.GET['sessao_plenaria']
-        )
-    elif url == "transf-mat-ordemdia":
-        materias_sessao = OrdemDia.objects.filter(
-            sessao_plenaria=request.GET['sessao_plenaria']
-        )
+    if title_flag == "Cópia de Matérias do Expediente":
+        materias_sessao_destino = [
+            expediente.materia for expediente in ExpedienteMateria.objects.filter(
+                sessao_plenaria=sessao_plenaria_destino
+            )
+        ]
 
-    lista_id_materias_sessao = [m.materia.id for m in materias_sessao]
-    return JsonResponse({'materias': lista_id_materias_sessao})
+        lista_materias_disponiveis_copia = ExpedienteMateria.objects.filter(
+            sessao_plenaria=sessao_plenaria
+        ).exclude(materia__in=materias_sessao_destino)    
+    
+    elif title_flag == "Cópia de Matérias da Ordem do Dia":
+        materias_sessao_destino = [
+            ordem.materia for ordem in OrdemDia.objects.filter(
+                sessao_plenaria=sessao_plenaria_destino
+            )
+        ]
+        
+        lista_materias_disponiveis_copia = OrdemDia.objects.filter(
+            sessao_plenaria=sessao_plenaria
+        ).exclude(materia__in=materias_sessao_destino)
+
+    lista_materias = [
+        {
+            'id': opcao.id,
+            'materia_id': opcao.materia.id,
+            'materia_tipo_sigla': opcao.materia.tipo.sigla,
+            'materia_numero': opcao.materia.numero,
+            'materia_ano': opcao.materia.ano,
+            'materia_tipo_descricao': opcao.materia.tipo.descricao
+        } for opcao in lista_materias_disponiveis_copia
+    ]
+
+    return JsonResponse({ 'materias': lista_materias })
 
 
 class TransferenciaMateriasSessaoAbstract(PermissionRequiredMixin, ListView):
@@ -567,23 +591,22 @@ class TransferenciaMateriasSessaoAbstract(PermissionRequiredMixin, ListView):
 
         if self.expediente:
             context["title"] = self.title
-            context['lista_disponiveis'] = ExpedienteMateria.objects.filter(
+            materias_sessao = ExpedienteMateria.objects.filter(
                 sessao_plenaria=sessao_plenaria_atual
-            )
+            ).exists()
 
         elif self.ordem:
             context["title"] = self.title
-            context['lista_disponiveis'] = OrdemDia.objects.filter(
+            materias_sessao = OrdemDia.objects.filter(
                 sessao_plenaria=sessao_plenaria_atual
-            )
+            ).exists()
 
-        context["numero_resultados"] = context['lista_disponiveis'].count()
-
-        if context['numero_resultados']:
-            context['sessoes'] = SessaoPlenaria.objects.filter(
+        if materias_sessao:
+            context['sessoes_destino'] = SessaoPlenaria.objects.filter(
                 data_inicio__gte=sessao_plenaria_atual.data_inicio
             ).exclude(pk=sessao_plenaria_atual.pk).order_by("-data_inicio")
         
+        context['materias_sessao'] = materias_sessao
         return context
 
     def post(self, request, *args, **kwargs):
@@ -597,8 +620,7 @@ class TransferenciaMateriasSessaoAbstract(PermissionRequiredMixin, ListView):
         sessao_plenaria_destino_id = request.POST['sessao_plenaria']
         if not sessao_plenaria_destino_id:
             self.logger.error(
-                "A variável sessao_plenaria da requisição de cópia de " \
-                "matérias entre sessões plenárias não existe."
+                "Sessão plenária de destino inexistente."
             )
 
             msg = _('Ocorreu um erro inesperado. Tente novamente.')
