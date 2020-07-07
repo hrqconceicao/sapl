@@ -41,7 +41,6 @@
 {% block extra_js %}
     <script language="Javascript">
         function checkAll(elem) {
-            let f = 0;
             let checkboxes = document.getElementsByName('opcao_id');
             for (let i=0; i<checkboxes.length; i++){
                 checkboxes[i].checked = elem.checked;
