@@ -43,7 +43,8 @@
         function checkAll(elem) {
             let checkboxes = document.getElementsByName('opcao_id');
             for (let i=0; i<checkboxes.length; i++){
-                checkboxes[i].checked = elem.checked;
+                if (checkboxes[i].type == 'checkbox')
+                    checkboxes[i].checked = elem.checked;
             }
         }
 
@@ -68,22 +69,22 @@
                         );
 
                         $("#tabela_materias").html(
-                                '<table class="table table-striped table-hover">'+
-                                    '<div class="controls">'+
-                                        '<div class="checkbox">'+
-                                            '<label for="id_check_all">'+
-                                                '<input type="checkbox" id="id_check_all" onchange="checkAll(this)"/>Marcar/Desmarcar Todos'+
-                                            '</label>'+
-                                        '</div>'+
+                            '<table class="table table-striped table-hover">'+
+                                '<div class="controls">'+
+                                    '<div class="checkbox">'+
+                                        '<label for="id_check_all">'+
+                                            '<input type="checkbox" id="id_check_all" onchange="checkAll(this)"/>Marcar/Desmarcar Todos'+
+                                        '</label>'+
                                     '</div>'+
-                                    '<thead><tr><td>Matéria</td></tr></thead>'+
-                                    '<tbody>'+
-                                        '<tr><td><h3 style="text-align: center;">Nenhuma máteria está disponível para cópia.</h3></td></tr>'+
-                                    '</tbody>'+
-                                '</table>'
-                            );
+                                '</div>'+
+                                '<thead><tr><td>Matéria</td></tr></thead>'+
+                                '<tbody>'+
+                                    '<tr><td><h3 style="text-align: center;">Nenhuma máteria está disponível para cópia.</h3></td></tr>'+
+                                '</tbody>'+
+                            '</table>'
+                        );
 
-                            $("#submit_button").html("");
+                        $("#submit_button").html("");
                     } else {
 
                         if (numero_resultados == 1){
