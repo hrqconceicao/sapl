@@ -3624,6 +3624,7 @@ class AdicionarVariasMateriasExpediente(PermissionRequiredForAppCrudMixin,
     filterset_class = AdicionarVariasMateriasFilterSet
     template_name = 'sessao/adicionar_varias_materias_expediente.html'
     app_label = AppConfig.label
+    tipo_materia_sessao = "expediente"
 
     logger = logging.getLogger(__name__)
 
@@ -3663,6 +3664,8 @@ class AdicionarVariasMateriasExpediente(PermissionRequiredForAppCrudMixin,
 
         context['filter_url'] = ('&' + qr.urlencode()) if len(qr) > 0 else ''
         context['pk_sessao'] = self.kwargs['pk']
+
+        context["tipo_materia_sessao"] = self.tipo_materia_sessao
 
         return context
 
@@ -3715,6 +3718,7 @@ class AdicionarVariasMateriasExpediente(PermissionRequiredForAppCrudMixin,
 class AdicionarVariasMateriasOrdemDia(AdicionarVariasMateriasExpediente):
     filterset_class = AdicionarVariasMateriasFilterSet
     template_name = 'sessao/adicionar_varias_materias_ordem.html'
+    tipo_materia_sessao = "ordem"
 
     logger = logging.getLogger(__name__)
 
